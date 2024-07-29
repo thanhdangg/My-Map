@@ -1,6 +1,7 @@
 package com.example.mymap
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -10,17 +11,25 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.mymap.databinding.ActivityMainBinding
+import com.example.mymap.socket.SocketManager
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
+
+    private lateinit var socketManager: SocketManager
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-     binding = ActivityMainBinding.inflate(layoutInflater)
-     setContentView(binding.root)
+//        socketManager = SocketManager()
+//        socketManager.connect()
+
+
+         binding = ActivityMainBinding.inflate(layoutInflater)
+         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
 
@@ -28,24 +37,29 @@ private lateinit var binding: ActivityMainBinding
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null)
-                    .setAnchorView(R.id.fab).show()
-        }
+
     }
-override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when(item.itemId) {
-            R.id.action_settings -> true
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+
+        return when (item.itemId) {
+            R.id.action_me -> {
+                navController.navigate(R.id.profileFragment)
+                true
+            }
+            R.id.action_settings -> {
+                navController.navigate(R.id.settingFragment)
+                true
+            }
+            R.id.action_friend -> {
+                navController.navigate(R.id.friendFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -54,5 +68,11 @@ override fun onCreateOptionsMenu(menu: Menu): Boolean {
     val navController = findNavController(R.id.nav_host_fragment_content_main)
     return navController.navigateUp(appBarConfiguration)
             || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+//        socketManager.disconnect()
+
     }
 }
