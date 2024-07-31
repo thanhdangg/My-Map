@@ -5,4 +5,10 @@ import com.example.mymap.socket.SocketManager
 
 class MyApplication : Application() {
     lateinit var socketManager: SocketManager
+
+    override fun onCreate() {
+        super.onCreate()
+        socketManager = SocketManager()
+//        socketManager.connect()
+    }
 }

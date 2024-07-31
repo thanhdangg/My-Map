@@ -13,7 +13,7 @@
     <string name="sent_friend_request">Send Friend Request</string>
     <string name="enter_user_id">Enter User ID</string>
     <string name="friend_request">Friend Request</string>
-    <string name="user_id">User ID here</string>
+    <string name="user_id">User ID</string>
     <string name="send_request">Send Request</string>
     <string name="accept">Accept</string>
     <string name="connect_serve">Connect Server</string>

@@ -22,6 +22,7 @@
         >
 
         <EditText
+            android:id="@+id/receiverId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
@@ -38,7 +39,7 @@
             android:padding="20dp"
             android:layout_margin="20dp"
             android:textColor="@color/black"
-            android:background="#00BFFF"
+            android:background="#B0C4DE"
             android:text="@string/send_request"
             >
 

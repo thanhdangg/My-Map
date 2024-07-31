@@ -1,6 +1,7 @@
 package com.example.mymap.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -29,15 +30,13 @@ class SettingFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         binding = FragmentSettingBinding.inflate(inflater, container, false)
 
         binding.btnConnectServer.setOnClickListener {
             val userId = binding.userId.text.toString()
-//            val application = requireActivity().application as MyApplication
             val application = context?.applicationContext as? MyApplication
             if (application == null) {
-                Log.d("SettingFragment", "Application is null")
+                Log.d("Tracking_SettingFragment", "Application is null")
                 return@setOnClickListener
             }
 
@@ -45,23 +44,28 @@ class SettingFragment : Fragment() {
             try{
                 application.socketManager.connect()
                 application.socketManager.register(userId.toInt())
-                Log.d("SettingFragment", "Connect success")
+                Log.d("Tracking_SettingFragment", "Connect success")
                 binding.btnConnectServer.text = "Connected to server"
                 binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))
                 binding.btnConnectServer.isEnabled = false
 
+                val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
+                with (sharedPref.edit()) {
+                    putString("userId", userId)
+                    apply()
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("SettingFragment", "Error: ${e.message}")
+                Log.d("Tracking_SettingFragment", "Error: ${e.message}")
             }
-//            application.socketManager.connect()
-//            application.socketManager.register(userId.toInt())
 
         }
 
 
         return binding.root
     }
+
 
 
 }

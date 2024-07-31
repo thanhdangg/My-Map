@@ -22,7 +22,7 @@
         >
 
         <TextView
-            android:id="@+id/user_id"
+            android:id="@+id/sender_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
@@ -34,6 +34,7 @@
         </TextView>
 
         <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_accept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="20dp"
