@@ -1,6 +1,10 @@
 package com.example.mymap.view
 
+import android.annotation.SuppressLint
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +24,7 @@ class SettingFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -29,10 +34,28 @@ class SettingFragment : Fragment() {
 
         binding.btnConnectServer.setOnClickListener {
             val userId = binding.userId.text.toString()
-            val application = requireActivity().application as MyApplication
+//            val application = requireActivity().application as MyApplication
+            val application = context?.applicationContext as? MyApplication
+            if (application == null) {
+                Log.d("SettingFragment", "Application is null")
+                return@setOnClickListener
+            }
+
             application.socketManager = SocketManager()
-            application.socketManager.connect()
-            application.socketManager.register(userId.toInt())
+            try{
+                application.socketManager.connect()
+                application.socketManager.register(userId.toInt())
+                Log.d("SettingFragment", "Connect success")
+                binding.btnConnectServer.text = "Connected to server"
+                binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))
+                binding.btnConnectServer.isEnabled = false
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.d("SettingFragment", "Error: ${e.message}")
+            }
+//            application.socketManager.connect()
+//            application.socketManager.register(userId.toInt())
 
         }
 
