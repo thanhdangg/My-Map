@@ -17,4 +17,10 @@
     <string name="send_request">Send Request</string>
     <string name="accept">Accept</string>
     <string name="connect_serve">Connect Server</string>
+    <string name="my_friend">My Friend</string>
+    <string name="find_my_friend">Find My Friend</string>
+    <string name="enter_phone_number">Enter phone number</string>
+    <string name="find">Find</string>
+    <string name="friend_info">Friend Infor</string>
+    <string name="view_location">View location</string>
 </resources>

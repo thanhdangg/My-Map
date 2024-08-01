@@ -10,11 +10,13 @@ class SocketManager {
     private var socket: Socket? = null
     var onFriendRequestReceived: ((String) -> Unit)? = null
     var onFriendAccepted: ((String) -> Unit)? = null
+    var onFindFriendResult: ((JSONObject) -> Unit)? = null
+
 
     fun connect() {
         try {
-//            socket = IO.socket("http://192.168.1.216:5000")
-            socket = IO.socket("http://192.168.2.131:5000")
+            socket = IO.socket("http://192.168.1.216:5000")
+//            socket = IO.socket("http://192.168.2.131:5000")
             socket?.connect()
         }
         catch (e: Exception) {
@@ -30,6 +32,15 @@ class SocketManager {
         socket?.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { args ->
             val error = args[0] as Exception
             Log.d("Tracking_Socket", "Connection error: ${error.message}")
+        })
+        socket?.on("check-friend", Emitter.Listener { args ->
+            try {
+                val data = args[0] as JSONObject
+                Log.d("Tracking_Socket", "Check friend result: $data")
+                onFindFriendResult?.invoke(data)
+            } catch (e: Exception) {
+                Log.e("Tracking_Socket", "Error processing 'check-friend' event: ${e.message}")
+            }
         })
 
         socket?.on("friend-request", Emitter.Listener { args ->
@@ -56,7 +67,6 @@ class SocketManager {
             val locationY = final.getDouble("locationY")
             Log.d("Tracking_Socket", "Friend request received with userId: $userId")
             onFriendRequestReceived?.invoke(userId)
-            // Handle friend request
         }
 
         socket?.on("friend-accepted", Emitter.Listener { args ->
@@ -81,6 +91,13 @@ class SocketManager {
             val final = data.getJSONObject("final")
             val userId = final.getString("id")
             listener.invoke(userId)
+        }
+    }
+    fun onFindFriendResult(listener: (JSONObject) -> Unit) {
+        socket?.on("check-friend") { args ->
+            val data = args[0] as JSONObject
+            listener.invoke(data)
+            Log.d("Tracking_Socket", "onFindFriendResult: $data")
         }
     }
 
@@ -111,6 +128,12 @@ class SocketManager {
         socket?.emit("accept-friend-request", data)
     }
 
+    fun findFriend(phoneNumber: String, userId: String) {
+        val data = JSONObject()
+        data.put("phoneNumber", phoneNumber)
+        data.put("userId", userId)
+        socket?.emit("find-friend", data)
+    }
     fun disconnect() {
         socket?.disconnect()
     }

@@ -54,6 +54,23 @@ class ProfileFragment : Fragment() {
                 binding.senderId.text = userId
             }
         }
+        socketManager.onFindFriendResult = { result ->
+            Log.d("Tracking_ProfileFragment", "onFindFriendResult: $result")
+            activity?.runOnUiThread {
+                val id = result.getString("id")
+                val phoneNumber = result.getString("phoneNumber")
+                val userName = result.getString("userName")
+                val locationX = result.getString("locationX")
+                val locationY = result.getString("locationY")
+                val friendId = result.getString("friendId")
+                val role = result.getString("role")
+
+                val friendInfo = "ID: $id\nPhone Number: $phoneNumber\nUser Name: $userName\nLocation: ($locationX, $locationY)\nFriend ID: $friendId\nRole: $role"
+                binding.friendInfo.visibility = View.VISIBLE
+                binding.friendInfo.text = friendInfo
+                binding.btnViewLocation.visibility = View.VISIBLE
+            }
+        }
 
         binding.btnAccept.setOnClickListener {
             binding.btnAccept.text = "Accepted"
@@ -70,17 +87,27 @@ class ProfileFragment : Fragment() {
                 Log.d("Tracking_ProfileFragment", "UserId: $userId")
             }
             val receiverId = binding.senderId.text.toString()
-//            var receiverId = ""
-//
-//            if ( userId == "1"){
-//                receiverId = "2"
-//            }
-//            else{
-//                receiverId = "1"
-//            }
 
             Log.d("Tracking_ProfileFragment", "userId $userId receiverId $receiverId")
             socketManager.acceptFriendRequest(userId,receiverId)
+        }
+
+        binding.btnFindFriend.setOnClickListener {
+            val phoneNumber = binding.phoneNumberInput.text.toString()
+            val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
+            val userId = sharedPref.getString("userId", null)
+            if (userId == null) {
+                Log.d("Tracking_ProfileFragment", "UserId is null")
+                return@setOnClickListener
+            }
+            else
+            {
+                Log.d("Tracking_ProfileFragment", "UserId: $userId phoneNumber: $phoneNumber")
+            }
+            socketManager.findFriend(phoneNumber, userId)
+        }
+        binding.btnViewLocation.setOnClickListener{
+
         }
 
         return binding.root
