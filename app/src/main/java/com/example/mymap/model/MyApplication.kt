@@ -9,6 +9,5 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         socketManager = SocketManager()
-//        socketManager.connect()
     }
 }

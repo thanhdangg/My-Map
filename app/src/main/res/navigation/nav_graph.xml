@@ -29,7 +29,11 @@
         android:id="@+id/friendFragment"
         android:name="com.example.mymap.view.FriendFragment"
         android:label="fragment_friend"
-        tools:layout="@layout/fragment_friend" />
+        tools:layout="@layout/fragment_friend" >
+        <action
+            android:id="@+id/action_friendFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
+    </fragment>
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.mymap.view.ProfileFragment"
@@ -43,10 +47,33 @@
         android:id="@+id/settingFragment"
         android:name="com.example.mymap.view.SettingFragment"
         android:label="fragment_setting"
-        tools:layout="@layout/fragment_setting" />
+        tools:layout="@layout/fragment_setting" >
+        <action
+            android:id="@+id/action_settingFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
+    </fragment>
     <activity
         android:id="@+id/mainActivity"
         android:name="com.example.mymap.MainActivity"
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/zoneAlertFragment"
+        android:name="com.example.mymap.view.ZoneAlertFragment"
+        android:label="fragment_zone_alert"
+        tools:layout="@layout/fragment_zone_alert" >
+        <action
+            android:id="@+id/action_zoneAlertFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/zoneFragment"
+        android:name="com.example.mymap.view.ZoneFragment"
+        android:label="fragment_zone"
+        tools:layout="@layout/fragment_zone" />
+    <activity
+        android:id="@+id/zoneActivity"
+        android:name="com.example.mymap.view.ZoneActivity"
+        android:label="activity_zone"
+        tools:layout="@layout/activity_zone" />
 </navigation>

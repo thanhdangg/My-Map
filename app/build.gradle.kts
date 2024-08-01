@@ -49,6 +49,7 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-maps:17.0.1")
     implementation("io.socket:socket.io-client:2.1.0")
+    implementation(libs.androidx.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

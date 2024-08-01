@@ -15,8 +15,6 @@ import com.example.mymap.R
 import com.example.mymap.databinding.FragmentProfileBinding
 import com.example.mymap.model.MyApplication
 import com.example.mymap.socket.SocketManager
-import org.json.JSONObject
-
 
 class ProfileFragment : Fragment() {
 
@@ -29,7 +27,7 @@ class ProfileFragment : Fragment() {
         super.onCreate(savedInstanceState)
         Log.d("Tracking_ProfileFragment", "onCreate")
 
-        socketManager.onFrinedRequest { userId ->
+        socketManager.onFriendRequest { userId ->
             Log.d("Tracking_ProfileFragment", "onFriendRequestReceived userId: $userId")
             activity?.runOnUiThread {
                 binding.senderId.text = userId
@@ -41,7 +39,7 @@ class ProfileFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
 
         val application = context?.applicationContext as? MyApplication
@@ -49,7 +47,7 @@ class ProfileFragment : Fragment() {
             socketManager = application.socketManager
         }
 
-        socketManager.onFrinedRequest { userId ->
+        socketManager.onFriendRequest { userId ->
             Log.d("Tracking_ProfileFragment", "onFriendRequestReceived userId: $userId")
             activity?.runOnUiThread {
                 binding.senderId.text = userId
@@ -115,7 +113,7 @@ class ProfileFragment : Fragment() {
 
         return binding.root
     }
-    fun saveUserInfo(context: Context, userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
+    private fun saveUserInfo(context: Context, userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
         val sharedPreferences = context.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("friend_userId", userId)

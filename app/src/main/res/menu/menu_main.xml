@@ -15,5 +15,10 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_zone_alert"
+        android:title="@string/action_zone_alert"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
 
 </menu>

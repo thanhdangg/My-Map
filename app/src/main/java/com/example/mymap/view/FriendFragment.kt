@@ -10,11 +10,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.mymap.R
 import com.example.mymap.databinding.FragmentFriendBinding
 import com.example.mymap.model.MyApplication
 import com.example.mymap.socket.SocketManager
-import org.json.JSONObject
 
 
 class FriendFragment : Fragment() {
@@ -22,16 +20,11 @@ class FriendFragment : Fragment() {
     private lateinit var socketManager: SocketManager
     private lateinit var binding: FragmentFriendBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = FragmentFriendBinding.inflate(inflater, container, false)
 

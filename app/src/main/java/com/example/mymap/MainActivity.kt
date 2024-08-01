@@ -1,8 +1,6 @@
 package com.example.mymap
 
 import android.os.Bundle
-import android.util.Log
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,15 +9,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.example.mymap.databinding.ActivityMainBinding
-import com.example.mymap.socket.SocketManager
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-
-    private lateinit var socketManager: SocketManager
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +54,10 @@ class MainActivity : AppCompatActivity() {
                 navController.navigate(R.id.friendFragment)
                 true
             }
+            R.id.action_zone_alert -> {
+                navController.navigate(R.id.zoneAlertFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -68,11 +66,5 @@ class MainActivity : AppCompatActivity() {
     val navController = findNavController(R.id.nav_host_fragment_content_main)
     return navController.navigateUp(appBarConfiguration)
             || super.onSupportNavigateUp()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-//        socketManager.disconnect()
-
     }
 }

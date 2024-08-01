@@ -23,4 +23,17 @@
     <string name="find">Find</string>
     <string name="friend_info">Friend Infor</string>
     <string name="view_location">View location</string>
+    <string name="action_zone_alert">Zone alert</string>
+    <string name="create_zone_alert">Create Zone</string>
+    <string name="zone_name">Zone Name</string>
+    <string name="zone_description">Zone Description</string>
+    <string name="search_location_here">Search location here</string>
+    <string name="done">Done</string>
+    <string name="enter_zone_name">Enter zone name</string>
+    <string name="status">Status</string>
+    <string name="safe">Safe</string>
+    <string name="danger">Danger</string>
+    <string name="alert">Alert</string>
+    <string name="on_enter">On enter</string>
+    <string name="on_leave">On leave</string>
 </resources>

@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.mymap.R
 import com.example.mymap.databinding.FragmentSettingBinding
 import com.example.mymap.model.MyApplication
 import com.example.mymap.socket.SocketManager
@@ -21,15 +20,11 @@ class SettingFragment : Fragment() {
     private lateinit var binding: FragmentSettingBinding
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentSettingBinding.inflate(inflater, container, false)
 
         binding.btnConnectServer.setOnClickListener {
@@ -82,7 +77,6 @@ class SettingFragment : Fragment() {
             }
 
         }
-
 
         return binding.root
     }

@@ -51,10 +51,10 @@ class SocketManager {
             Log.d("Tracking_Socket", "Friend request received: $data")
             val final = data.getJSONObject("final")
             val userId = final.getString("id")
-            val userName = final.getString("userName")
-            val phoneNumber = final.getString("phoneNumber")
-            val locationX = final.getDouble("locationX")
-            val locationY = final.getDouble("locationY")
+//            val userName = final.getString("userName")
+//            val phoneNumber = final.getString("phoneNumber")
+//            val locationX = final.getDouble("locationX")
+//            val locationY = final.getDouble("locationY")
             Log.d("Tracking_Socket", "Friend request received with userId: $userId")
             onFriendRequestReceived?.invoke(userId)
             // Handle friend request
@@ -64,10 +64,10 @@ class SocketManager {
             Log.d("Tracking_Socket", "Friend request received: $data")
             val final = data.getJSONObject("final")
             val userId = final.getString("id") // Change this line
-            val userName = final.getString("userName")
-            val phoneNumber = final.getString("phoneNumber")
-            val locationX = final.getDouble("locationX")
-            val locationY = final.getDouble("locationY")
+//            val userName = final.getString("userName")
+//            val phoneNumber = final.getString("phoneNumber")
+//            val locationX = final.getDouble("locationX")
+//            val locationY = final.getDouble("locationY")
             Log.d("Tracking_Socket", "Friend request received with userId: $userId")
             onFriendRequestReceived?.invoke(userId)
         }
@@ -76,10 +76,10 @@ class SocketManager {
             val data = args[0] as JSONObject
             val receiverInfo = data.getJSONObject("receiverInfo")
             val userId = receiverInfo.getString("id")
-            val userName = receiverInfo.getString("userName")
-            val phoneNumber = receiverInfo.getString("phoneNumber")
-            val locationX = receiverInfo.getDouble("locationX")
-            val locationY = receiverInfo.getDouble("locationY")
+//            val userName = receiverInfo.getString("userName")
+//            val phoneNumber = receiverInfo.getString("phoneNumber")
+//            val locationX = receiverInfo.getDouble("locationX")
+//            val locationY = receiverInfo.getDouble("locationY")
             onFriendAccepted?.invoke(userId)
 
         })
@@ -107,7 +107,7 @@ class SocketManager {
         socket?.on(eventName, listener)
     }
 
-    fun onFrinedRequest(listener: (String) -> Unit) {
+    fun onFriendRequest(listener: (String) -> Unit) {
         socket?.on("friend-request") { args ->
             val data = args[0] as JSONObject
             val final = data.getJSONObject("final")

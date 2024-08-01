@@ -3,7 +3,6 @@ package com.example.mymap.view
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.health.connect.datatypes.ExerciseRoute
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -13,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
-import androidx.navigation.fragment.findNavController
 import com.example.mymap.R
 import com.example.mymap.databinding.FragmentFirstBinding
 import com.example.mymap.model.MyApplication
@@ -34,39 +32,33 @@ class FirstFragment : Fragment() {
     private  var socketManager =  SocketManager()
 
 
-    val LOCATION_PERMISSION_REQUEST_CODE  = 101
+    private val LOCATION_PERMISSION_REQUEST_CODE  = 101
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: android.location.Location) {
-            googleMap.clear()
-            val currentLocation = LatLng(location.latitude, location.longitude)
-            googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-            Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+    private val locationListener: LocationListener = LocationListener { location ->
+        googleMap.clear()
+        val currentLocation = LatLng(location.latitude, location.longitude)
+        googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+        Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
-            val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
-            val userId = sharedPreferences?.getString("userId", "")
-            val userName = sharedPreferences?.getString("userName", "")
-            val phoneNumber = sharedPreferences?.getString("phoneNumber", "")
+        val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+        val userId = sharedPreferences?.getString("userId", "")
+        val userName = sharedPreferences?.getString("userName", "")
+        val phoneNumber = sharedPreferences?.getString("phoneNumber", "")
 
-            // Send tracking info to server
-            if (userId != null && userName != null && phoneNumber != null) {
-                Log.d("Tracking_Location", "onLocationChanged User info: $userId, $userName, $phoneNumber")
-                (activity?.application as? MyApplication)?.socketManager?.sendTrackingInfo(
-                    userId,
-                    userName,
-                    phoneNumber,
-                    location.latitude,
-                    location.longitude
-                )
-            }
-            else {
-                Log.d("Tracking_Location", "User info not available")
-            }
+        // Send tracking info to server
+        if (userId != null && userName != null && phoneNumber != null) {
+            Log.d("Tracking_Location", "onLocationChanged User info: $userId, $userName, $phoneNumber")
+            (activity?.application as? MyApplication)?.socketManager?.sendTrackingInfo(
+                userId,
+                userName,
+                phoneNumber,
+                location.latitude,
+                location.longitude
+            )
+        } else {
+            Log.d("Tracking_Location", "User info not available")
         }
     }
 
@@ -182,6 +174,7 @@ class FirstFragment : Fragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
@@ -206,14 +199,6 @@ class FirstFragment : Fragment() {
         }
     }
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-//        binding.buttonFirst.setOnClickListener {
-//            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-//        }
-    }
 
     override fun onDestroyView() {
             super.onDestroyView()
