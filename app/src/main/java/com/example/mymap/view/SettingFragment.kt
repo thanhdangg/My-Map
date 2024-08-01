@@ -44,16 +44,37 @@ class SettingFragment : Fragment() {
             try{
                 application.socketManager.connect()
                 application.socketManager.register(userId.toInt())
+
+                application.socketManager.onUserInfoReceived = { userInfo ->
+                    val userName = userInfo.getString("userName")
+                    val phoneNumber = userInfo.getString("phoneNumber")
+                    Log.d("Tracking_SettingFragment", "User info: $userId, $userName, $phoneNumber")
+
+//                    val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+                    val sharedPref = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+                    if (sharedPref != null) {
+                        with (sharedPref.edit()) {
+                            putString("userId", userId)
+                            putString("userName", userName)
+                            putString("phoneNumber", phoneNumber)
+                            apply()
+                        }
+                        Log.d("Tracking_SettingFragment", "SharedPref saved: $userId, $userName, $phoneNumber")
+                    }
+                }
+                application.socketManager.getUserInfo(userId.toInt())
+
+
                 Log.d("Tracking_SettingFragment", "Connect success")
                 binding.btnConnectServer.text = "Connected to server"
                 binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))
                 binding.btnConnectServer.isEnabled = false
 
-                val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
-                with (sharedPref.edit()) {
-                    putString("userId", userId)
-                    apply()
-                }
+//                val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
+//                with (sharedPref.edit()) {
+//                    putString("userId", userId)
+//                    apply()
+//                }
 
             } catch (e: Exception) {
                 e.printStackTrace()

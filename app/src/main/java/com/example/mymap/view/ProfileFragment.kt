@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.example.mymap.R
 import com.example.mymap.databinding.FragmentProfileBinding
 import com.example.mymap.model.MyApplication
@@ -65,6 +66,8 @@ class ProfileFragment : Fragment() {
                 val friendId = result.getString("friendId")
                 val role = result.getString("role")
 
+                saveUserInfo(requireContext(), id, userName, phoneNumber, locationX.toDouble(), locationY.toDouble())
+
                 val friendInfo = "ID: $id\nPhone Number: $phoneNumber\nUser Name: $userName\nLocation: ($locationX, $locationY)\nFriend ID: $friendId\nRole: $role"
                 binding.friendInfo.visibility = View.VISIBLE
                 binding.friendInfo.text = friendInfo
@@ -107,10 +110,20 @@ class ProfileFragment : Fragment() {
             socketManager.findFriend(phoneNumber, userId)
         }
         binding.btnViewLocation.setOnClickListener{
-
+            findNavController().navigate(R.id.action_profileFragment_to_FirstFragment)
         }
 
         return binding.root
+    }
+    fun saveUserInfo(context: Context, userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
+        val sharedPreferences = context.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("friend_userId", userId)
+        editor.putString("friend_userName", userName)
+        editor.putString("friend_phoneNumber", phoneNumber)
+        editor.putString("friend_locationX", locationX.toString())
+        editor.putString("friend_locationY", locationY.toString())
+        editor.apply()
     }
 
 }

@@ -4,6 +4,7 @@ import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import org.json.JSONArray
 import org.json.JSONObject
 
 class SocketManager {
@@ -11,6 +12,8 @@ class SocketManager {
     var onFriendRequestReceived: ((String) -> Unit)? = null
     var onFriendAccepted: ((String) -> Unit)? = null
     var onFindFriendResult: ((JSONObject) -> Unit)? = null
+    var onLocationUpdateReceived: ((JSONArray) -> Unit)? = null
+    var onUserInfoReceived: ((JSONObject) -> Unit)? = null
 
 
     fun connect() {
@@ -80,6 +83,25 @@ class SocketManager {
             onFriendAccepted?.invoke(userId)
 
         })
+
+        socket?.on("location-update", Emitter.Listener { args ->
+            val data = args[0] as JSONArray
+            Log.d("Tracking_Socket", "Location update received: $data")
+            onLocationUpdateReceived?.invoke(data)
+        })
+
+        socket?.on("user-info", Emitter.Listener { args ->
+            val data = args[0] as JSONObject
+            Log.d("Tracking_Socket", "User info received: $data")
+            onUserInfoReceived?.invoke(data)
+        })
+    }
+
+    fun getUserInfo(userId: Int) {
+        val data = JSONObject()
+        data.put("userId", userId)
+        socket?.emit("get-user-info", userId)
+        onUserInfoReceived?.invoke(data)
     }
     fun on(eventName: String, listener: Emitter.Listener) {
         socket?.on(eventName, listener)
@@ -105,6 +127,11 @@ class SocketManager {
     fun isConnected(): Boolean {
         return socket?.connected() ?: false
     }
+
+    fun disconnect() {
+        socket?.disconnect()
+    }
+
     fun register(userId: Int) {
         socket?.emit("register", userId)
     }
@@ -134,7 +161,15 @@ class SocketManager {
         data.put("userId", userId)
         socket?.emit("find-friend", data)
     }
-    fun disconnect() {
-        socket?.disconnect()
+
+    fun sendTrackingInfo(userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
+        val data = JSONObject()
+        data.put("userId", userId)
+        data.put("userName", userName)
+        data.put("phoneNumber", phoneNumber)
+        data.put("locationX", locationX)
+        data.put("locationY", locationY)
+        socket?.emit("tracking", data)
     }
+
 }

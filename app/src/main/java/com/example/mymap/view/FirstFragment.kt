@@ -16,20 +16,29 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.fragment.findNavController
 import com.example.mymap.R
 import com.example.mymap.databinding.FragmentFirstBinding
+import com.example.mymap.model.MyApplication
+import com.example.mymap.socket.SocketManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
 class FirstFragment : Fragment() {
 
     private var _binding: FragmentFirstBinding? = null
-
     private val binding get() = _binding!!
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
+    private  var socketManager =  SocketManager()
+
+
     val LOCATION_PERMISSION_REQUEST_CODE  = 101
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
     private val locationListener: LocationListener = object : LocationListener {
         override fun onLocationChanged(location: android.location.Location) {
@@ -37,7 +46,27 @@ class FirstFragment : Fragment() {
             val currentLocation = LatLng(location.latitude, location.longitude)
             googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-//            Log.d("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+            Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+
+            val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+            val userId = sharedPreferences?.getString("userId", "")
+            val userName = sharedPreferences?.getString("userName", "")
+            val phoneNumber = sharedPreferences?.getString("phoneNumber", "")
+
+            // Send tracking info to server
+            if (userId != null && userName != null && phoneNumber != null) {
+                Log.d("Tracking_Location", "onLocationChanged User info: $userId, $userName, $phoneNumber")
+                (activity?.application as? MyApplication)?.socketManager?.sendTrackingInfo(
+                    userId,
+                    userName,
+                    phoneNumber,
+                    location.latitude,
+                    location.longitude
+                )
+            }
+            else {
+                Log.d("Tracking_Location", "User info not available")
+            }
         }
     }
 
@@ -48,6 +77,10 @@ class FirstFragment : Fragment() {
     ): View {
 
       _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        val application = context?.applicationContext as? MyApplication
+        if (application != null) {
+            socketManager = application.socketManager
+        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync { map ->
@@ -65,7 +98,7 @@ class FirstFragment : Fragment() {
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
                 // Request location permissions if not granted
-                Log.d("Location", "Requesting location permission")
+                Log.d("Tracking_Location", "Requesting location permission")
                 requestLocationPermission()
 
                 return@setOnClickListener
@@ -74,15 +107,64 @@ class FirstFragment : Fragment() {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
             val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             if (location != null) {
-                Log.d("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+                Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
                 val currentLocation = LatLng(location.latitude, location.longitude)
+//                Red maker
                 googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
+
+//                green maker
+//                val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
+//                googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location").icon(markerColor))
+
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+
+                val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+                val userId = sharedPreferences?.getString("userId", "")
+                val userName = sharedPreferences?.getString("userName", "")
+                val phoneNumber = sharedPreferences?.getString("phoneNumber", "")
+
+
+                if (userId != null && userName != null && phoneNumber != null) {
+                    Log.d("Tracking_Location", "Info: $userId, $userName, $phoneNumber")
+                    (activity?.application as? MyApplication)?.socketManager?.sendTrackingInfo(
+                        userId,
+                        userName,
+                        phoneNumber,
+                        location.latitude,
+                        location.longitude
+                    )
+                }
+                else {
+                    Log.d("Tracking_Location", "Info not available")
+                }
             }
             else {
-                Log.d("Location", "Location not available")
+                Log.d("Tracking_Location", "Location not available")
             }
         }
+
+        binding.btnLocationFriend.setOnClickListener {
+            val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+            val userId = sharedPreferences?.getString("friend_userId", "")
+            val userName = sharedPreferences?.getString("friend_userName", "")
+            val phoneNumber = sharedPreferences?.getString("friend_phoneNumber", "")
+            val locationX = sharedPreferences?.getString("friend_locationX", "")
+            val locationY = sharedPreferences?.getString("friend_locationY", "")
+
+            if (userId != null && userName != null && phoneNumber != null && locationX != null && locationY != null) {
+                val currentLocationFriend = LatLng(locationX.toDouble(), locationY.toDouble())
+
+                //Green Maker
+                val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
+                googleMap.addMarker(MarkerOptions().position(currentLocationFriend).title("Current Location").icon(markerColor))
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocationFriend, 15f))
+
+            }
+            else {
+                Log.d("Tracking_Location", "Friend info not available")
+            }
+        }
+
         return binding.root
 
     }
@@ -136,7 +218,6 @@ class FirstFragment : Fragment() {
     override fun onDestroyView() {
             super.onDestroyView()
         locationManager.removeUpdates(locationListener)
-
         _binding = null
         }
 }
