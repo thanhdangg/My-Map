@@ -36,4 +36,6 @@
     <string name="alert">Alert</string>
     <string name="on_enter">On enter</string>
     <string name="on_leave">On leave</string>
+    <string name="back">Back</string>
+    <string name="create_zone">Create Zone</string>
 </resources>
