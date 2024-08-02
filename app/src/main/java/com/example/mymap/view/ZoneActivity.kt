@@ -26,7 +26,6 @@ import com.example.mymap.R
 import com.example.mymap.database.AppDatabase
 import com.example.mymap.databinding.ActivityZoneBinding
 import com.example.mymap.model.ZoneAlert
-import com.example.mymap.model.ZoneAlertEntity
 import com.example.mymap.socket.SocketManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -46,15 +45,14 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
     private var onLeave = false
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
-    private  var socketManager =  SocketManager()
+    private lateinit var socketManager: SocketManager
+
     private var zoneLocation: LatLng? = null
     private val locationListener: LocationListener = LocationListener { location ->
         googleMap.clear()
         val currentLocation = LatLng(location.latitude, location.longitude)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
     }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,34 +105,23 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
 
             Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation, radius: $radiusInMeters")
 
-            val zoneAlert = ZoneAlert(
-                zoneName,
-                status,
-                onEnter,
-                onLeave,
-                currentZoneLocation?.latitude ?: 0.0,
-                currentZoneLocation?.longitude ?: 0.0,
-                radiusInMeters
-            )
-
             val db = AppDatabase.getDatabase(applicationContext)
             CoroutineScope(Dispatchers.IO).launch {
                 db.zoneAlertDao().insert(
-                    ZoneAlertEntity(
-                        zoneName = zoneAlert.zoneName,
-                        status = zoneAlert.status,
-                        onEnter = zoneAlert.onEnter,
-                        onLeave = zoneAlert.onLeave,
-                        latitude = zoneAlert.latitude,
-                        longitude = zoneAlert.longitude,
-                        radius = zoneAlert.radius
+                    ZoneAlert(
+                        zoneName = zoneName,
+                        status = status,
+                        onEnter = onEnter,
+                        onLeave = onLeave,
+                        latitude = currentZoneLocation?.latitude ?: 0.0,
+                        longitude = currentZoneLocation?.longitude ?: 0.0,
+                        radius = radiusInMeters
                     )
                 )
             }
 
 
             val intent = Intent(this, MainActivity::class.java).apply {
-                putExtra("zoneAlert", zoneAlert)
             }
             startActivity(intent)
 

@@ -24,7 +24,7 @@ class ZoneAlertAdapter(private val zoneAlerts: List<ZoneAlert>) : RecyclerView.A
         return ViewHolder(view)
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val zoneAlert = zoneAlerts[position]
         holder.zoneName.text = zoneAlert.zoneName
@@ -38,7 +38,11 @@ class ZoneAlertAdapter(private val zoneAlerts: List<ZoneAlert>) : RecyclerView.A
                 "\nRadius: ${zoneAlert.radius}m, " +
                 "\nOn Enter: ${zoneAlert.onEnter}, " +
                 "On Leave: ${zoneAlert.onLeave}"
-        
+        holder.itemView.setOnLongClickListener {
+            zoneAlerts.toMutableList().removeAt(position)
+            notifyDataSetChanged()
+            true
+        }
 
     }
 

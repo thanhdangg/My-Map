@@ -35,7 +35,7 @@ class SettingFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            application.socketManager = SocketManager()
+            application.socketManager = SocketManager(requireContext())
             try{
                 application.socketManager.connect()
                 application.socketManager.register(userId.toInt())
@@ -65,11 +65,6 @@ class SettingFragment : Fragment() {
                 binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))
                 binding.btnConnectServer.isEnabled = false
 
-//                val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
-//                with (sharedPref.edit()) {
-//                    putString("userId", userId)
-//                    apply()
-//                }
 
             } catch (e: Exception) {
                 e.printStackTrace()

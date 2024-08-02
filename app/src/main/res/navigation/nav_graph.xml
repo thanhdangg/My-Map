@@ -11,19 +11,6 @@
         android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first" >
 
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.mymap.view.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second" >
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
     </fragment>
     <fragment
         android:id="@+id/friendFragment"
@@ -65,16 +52,6 @@
         <action
             android:id="@+id/action_zoneAlertFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/zoneFragment"
-        android:name="com.example.mymap.view.ZoneFragment"
-        android:label="fragment_zone"
-        tools:layout="@layout/fragment_zone">
-        <argument
-            android:name="zoneAlert"
-            app:argType="com.example.mymap.model.ZoneAlert"
-            android:defaultValue="@null" />
     </fragment>
 
 

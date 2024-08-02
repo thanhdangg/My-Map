@@ -16,7 +16,6 @@ import com.example.mymap.database.AppDatabase
 import com.example.mymap.databinding.FragmentSettingBinding
 import com.example.mymap.databinding.FragmentZoneAlertBinding
 import com.example.mymap.model.ZoneAlert
-import com.example.mymap.model.ZoneAlertEntity
 import kotlinx.coroutines.launch
 
 class ZoneAlertFragment : Fragment() {
@@ -37,13 +36,12 @@ class ZoneAlertFragment : Fragment() {
         binding = FragmentZoneAlertBinding.inflate(inflater, container, false)
         zoneAlertAdapter = ZoneAlertAdapter(zoneAlerts)
         binding.rvZoneAlert.adapter = zoneAlertAdapter
-        binding.rvZoneAlert.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-
+        binding.rvZoneAlert.layoutManager = LinearLayoutManager(context).apply {
+            reverseLayout = true
+            stackFromEnd = true
+        }
         loadZoneAlerts()
-//
-//        arguments?.getParcelable<ZoneAlert>("zoneAlert")?.let {
-//            addZoneAlert(it)
-//        }
+
 
         binding.btnCreateZoneAlert.setOnClickListener {
             val intent = Intent(activity, ZoneActivity::class.java)
@@ -57,7 +55,7 @@ class ZoneAlertFragment : Fragment() {
 //        zoneAlerts.add(zoneAlert)
 //        zoneAlertAdapter.notifyDataSetChanged()
         val db = AppDatabase.getDatabase(requireContext())
-        val zoneAlertEntity = ZoneAlertEntity(
+        val zoneAlertEntity = ZoneAlert(
             zoneName = zoneAlert.zoneName,
             status = zoneAlert.status,
             onEnter = zoneAlert.onEnter,

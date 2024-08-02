@@ -29,11 +29,9 @@ class FirstFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
-    private  var socketManager =  SocketManager()
+    private lateinit var socketManager: SocketManager
 
-
-    private val LOCATION_PERMISSION_REQUEST_CODE  = 101
-
+    private val LOCATION_PERMISSION_REQUEST_CODE = 101
 
     private val locationListener: LocationListener = LocationListener { location ->
         googleMap.clear()
@@ -62,17 +60,18 @@ class FirstFragment : Fragment() {
         }
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val application = context.applicationContext as MyApplication
+        socketManager = application.socketManager
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
 
-      _binding = FragmentFirstBinding.inflate(inflater, container, false)
-        val application = context?.applicationContext as? MyApplication
-        if (application != null) {
-            socketManager = application.socketManager
-        }
+        _binding = FragmentFirstBinding.inflate(inflater, container, false)
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync { map ->
@@ -92,7 +91,6 @@ class FirstFragment : Fragment() {
                 // Request location permissions if not granted
                 Log.d("Tracking_Location", "Requesting location permission")
                 requestLocationPermission()
-
                 return@setOnClickListener
             }
 
@@ -101,20 +99,13 @@ class FirstFragment : Fragment() {
             if (location != null) {
                 Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
                 val currentLocation = LatLng(location.latitude, location.longitude)
-//                Red maker
                 googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
-
-//                green maker
-//                val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
-//                googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location").icon(markerColor))
-
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
 
                 val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
                 val userId = sharedPreferences?.getString("userId", "")
                 val userName = sharedPreferences?.getString("userName", "")
                 val phoneNumber = sharedPreferences?.getString("phoneNumber", "")
-
 
                 if (userId != null && userName != null && phoneNumber != null) {
                     Log.d("Tracking_Location", "Info: $userId, $userName, $phoneNumber")
@@ -125,12 +116,10 @@ class FirstFragment : Fragment() {
                         location.latitude,
                         location.longitude
                     )
-                }
-                else {
+                } else {
                     Log.d("Tracking_Location", "Info not available")
                 }
-            }
-            else {
+            } else {
                 Log.d("Tracking_Location", "Location not available")
             }
         }
@@ -145,27 +134,21 @@ class FirstFragment : Fragment() {
 
             if (userId != null && userName != null && phoneNumber != null && locationX != null && locationY != null) {
                 val currentLocationFriend = LatLng(locationX.toDouble(), locationY.toDouble())
-
-                //Green Maker
                 val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)
-                googleMap.addMarker(MarkerOptions().position(currentLocationFriend).title("Current Location").icon(markerColor))
+                googleMap.addMarker(MarkerOptions().position(currentLocationFriend).title("Friend's Location").icon(markerColor))
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocationFriend, 15f))
-
-            }
-            else {
+            } else {
                 Log.d("Tracking_Location", "Friend info not available")
             }
         }
 
         return binding.root
-
     }
+
     private fun requestLocationPermission() {
         if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
             // Show an explanation to the user *asynchronously*
-            // After the user sees the explanation, try again to request the permission.
         } else {
-            // No explanation needed; request the permission
             ActivityCompat.requestPermissions(
                 requireActivity(),
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -174,12 +157,10 @@ class FirstFragment : Fragment() {
         }
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission was granted, yay! Do the location-related task you need to do.
                     if (ActivityCompat.checkSelfPermission(
                             requireContext(),
                             Manifest.permission.ACCESS_FINE_LOCATION
@@ -192,17 +173,16 @@ class FirstFragment : Fragment() {
                     }
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
                 } else {
-                    // Permission denied, boo! Disable the functionality that depends on this permission.
+                    // Permission denied, disable the functionality that depends on this permission.
                 }
                 return
             }
         }
     }
 
-
     override fun onDestroyView() {
-            super.onDestroyView()
+        super.onDestroyView()
         locationManager.removeUpdates(locationListener)
         _binding = null
-        }
+    }
 }

@@ -1,13 +1,19 @@
 package com.example.mymap.socket
 
+import android.content.Context
 import android.util.Log
+import com.example.mymap.database.AppDatabase
+import com.example.mymap.model.ZoneAlert
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.*
 
-class SocketManager {
+
+class SocketManager(private val context: Context) {
     private var socket: Socket? = null
     var onFriendRequestReceived: ((String) -> Unit)? = null
     var onFriendAccepted: ((String) -> Unit)? = null
@@ -15,11 +21,14 @@ class SocketManager {
     var onLocationUpdateReceived: ((JSONArray) -> Unit)? = null
     var onUserInfoReceived: ((JSONObject) -> Unit)? = null
 
+    var onFriendEnterZone: ((String, ZoneAlert) -> Unit)? = null
+    var onFriendLeaveZone: ((String, ZoneAlert) -> Unit)? = null
+
 
     fun connect() {
         try {
-            socket = IO.socket("http://192.168.1.216:5000")
-//            socket = IO.socket("http://192.168.2.131:5000")
+//            socket = IO.socket("http://192.168.1.216:5000")
+            socket = IO.socket("http://192.168.2.131:5000")
             socket?.connect()
         }
         catch (e: Exception) {
@@ -94,8 +103,61 @@ class SocketManager {
             val data = args[0] as JSONObject
             Log.d("Tracking_Socket", "User info received: $data")
             onUserInfoReceived?.invoke(data)
+            handleLocationUpdate(data)
+
         })
     }
+    private fun handleLocationUpdate(data: JSONObject) {
+        if (data.has("locations")) {
+            val locationArray = data.getJSONArray("locations")
+            for (i in 0 until locationArray.length()) {
+                val friendLocation = locationArray.getJSONObject(i)
+                val userId = friendLocation.getString("id")
+                val locationX = friendLocation.getDouble("locationX")
+                val locationY = friendLocation.getDouble("locationY")
+
+                // Fetch zones from RoomDatabase
+                val zones = getZonesFromDatabase()
+
+                for (zone in zones) {
+                    if (isWithinZone(locationX, locationY, zone)) {
+                        onFriendEnterZone?.invoke(userId, zone)
+                    } else {
+                        onFriendLeaveZone?.invoke(userId, zone)
+                    }
+                }
+            }
+        } else {
+            Log.e("SocketManager", "No value for locations")
+        }
+    }
+
+    private fun getZonesFromDatabase(): List<ZoneAlert> {
+        val db = AppDatabase.getDatabase(context)
+        return runBlocking {
+            db.zoneAlertDao().getAllZoneAlerts()
+        }
+    }
+
+    private fun isWithinZone(locationX: Double, locationY: Double, zone: ZoneAlert): Boolean {
+        val earthRadius = 6371e3 // Earth radius in meters
+
+        val lat1 = Math.toRadians(locationX)
+        val lon1 = Math.toRadians(locationY)
+        val lat2 = Math.toRadians(zone.latitude)
+        val lon2 = Math.toRadians(zone.longitude)
+
+        val dLat = lat2 - lat1
+        val dLon = lon2 - lon1
+
+        val a = sin(dLat / 2).pow(2) + cos(lat1) * cos(lat2) * sin(dLon / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        val distance = earthRadius * c
+
+        return distance <= zone.radius
+    }
+
 
     fun getUserInfo(userId: Int) {
         val data = JSONObject()

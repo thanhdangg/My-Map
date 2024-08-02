@@ -30,14 +30,9 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
-        val zoneAlert: ZoneAlert? = intent.getParcelableExtra("zoneAlert")
 
-        if (zoneAlert != null) {
-            val bundle = Bundle().apply {
-                putParcelable("zoneAlert", zoneAlert)
-            }
-            navController.navigate(R.id.zoneAlertFragment, bundle)
-        }
+        navController.navigate(R.id.zoneAlertFragment)
+
 
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

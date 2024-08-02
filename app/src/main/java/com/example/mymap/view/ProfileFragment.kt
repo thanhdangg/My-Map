@@ -19,13 +19,17 @@ import com.example.mymap.socket.SocketManager
 class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
-    private  var socketManager =  SocketManager()
+    private lateinit var socketManager: SocketManager
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        val application = context.applicationContext as MyApplication
+        socketManager = application.socketManager
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("Tracking_ProfileFragment", "onCreate")
 
         socketManager.onFriendRequest { userId ->
             Log.d("Tracking_ProfileFragment", "onFriendRequestReceived userId: $userId")
@@ -42,10 +46,10 @@ class ProfileFragment : Fragment() {
     ): View {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
 
-        val application = context?.applicationContext as? MyApplication
-        if (application != null) {
-            socketManager = application.socketManager
-        }
+//        val application = context?.applicationContext as? MyApplication
+//        if (application != null) {
+//            socketManager = application.socketManager
+//        }
 
         socketManager.onFriendRequest { userId ->
             Log.d("Tracking_ProfileFragment", "onFriendRequestReceived userId: $userId")
