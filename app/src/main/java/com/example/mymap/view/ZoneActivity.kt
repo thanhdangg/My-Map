@@ -2,12 +2,17 @@ package com.example.mymap.view
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Point
+import android.location.Geocoder
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.SearchView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,10 +35,10 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
     private var zoneStatus = ""
     private var onEnter = false
     private var onLeave = false
-    private var zoneName = ""
     private lateinit var googleMap: GoogleMap
     private lateinit var locationManager: LocationManager
     private  var socketManager =  SocketManager()
+    private var zoneLocation: LatLng? = null
     private val locationListener: LocationListener = LocationListener { location ->
         googleMap.clear()
         val currentLocation = LatLng(location.latitude, location.longitude)
@@ -62,7 +67,6 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0f, locationListener)
         }
-
         binding.fab.setOnClickListener { view ->
             val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             if (location != null) {
@@ -71,7 +75,6 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-
         setSupportActionBar(binding.toolbar)
         binding.icBack.setOnClickListener(View.OnClickListener {
             onBackPressed()
@@ -79,6 +82,19 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding.icDone.setOnClickListener(View.OnClickListener {
             Log.d("ZoneActivity", "on done clicked")
+            val zoneName = binding.zoneName.text.toString()
+            val status = zoneStatus
+            val onEnter = binding.alertOnEnter.isChecked
+            val onLeave = binding.alertOnLeave.isChecked
+
+//            val x = binding.zoneLocation.left + binding.zoneLocation.width / 2
+//            val y = binding.zoneLocation.top + binding.zoneLocation.height / 2
+//
+//            val point = Point(x, y)
+//            zoneLocation = googleMap.projection.fromScreenLocation(point)
+            zoneLocation = googleMap.cameraPosition.target
+
+            Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation")
         })
         binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
@@ -98,13 +114,38 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.alertOnLeave.setOnCheckedChangeListener { _, isChecked ->
             onLeave = isChecked
         }
-        binding.zoneName.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                zoneName = binding.zoneName.text.toString()
+
+        binding.searchLocation.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                val locationName = query.toString()
+
+                // Use a Geocoder to get a list of Address objects from the input text
+                val geocoder = Geocoder(this@ZoneActivity)
+                val addresses = geocoder.getFromLocationName(locationName, 1)
+
+                // Check if the list is not empty
+                if (addresses != null) {
+                    if (addresses.isNotEmpty()) {
+                        // Get the LatLng from the first Address in the list
+                        val address = addresses[0]
+                        val latLng = LatLng(address.latitude, address.longitude)
+
+                        // Move the camera to the LatLng
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    } else {
+                        Toast.makeText(this@ZoneActivity, "Location not found", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                // Consume the event
+                return true
             }
-        }
 
-
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Do something when the query text changes
+                return false
+            }
+        })
 
     }
     override fun onMapReady(googleMap: GoogleMap) {
@@ -115,6 +156,7 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0f, locationListener)
         }
+
     }
 
     override fun onStart() {

@@ -60,44 +60,44 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        >
+        android:layout_weight="1">
+
         <com.google.android.gms.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
         <SearchView
             android:id="@+id/search_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
+            android:layout_margin="16dp"
             android:background="@drawable/rounded_border"
             android:layoutDirection="rtl"
-            android:layout_margin="16dp"
             android:queryHint="Search here"
-            />
+            android:textAlignment="center" />
+
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
-            >
+            android:gravity="center">
 
             <View
                 android:id="@+id/zone_view"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:background="@drawable/gradient_circle_safe"
-                android:alpha="0.7"/>
+                android:alpha="0.7"
+                android:background="@drawable/gradient_circle_safe" />
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_location"
+                android:id="@+id/zone_location"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
-                />
+                android:src="@drawable/ic_location" />
+
+
         </FrameLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -107,11 +107,12 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_marginBottom="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_my_location"
             android:alpha="0.5"
-            />
+            app:srcCompat="@drawable/ic_my_location" />
+
 
     </FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
