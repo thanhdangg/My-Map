@@ -1,1 +1,3 @@
 /build
+app/src/main/AndroidManifest.xml
+app/src/main/java/com/example/mymap/util/Constants.kt
