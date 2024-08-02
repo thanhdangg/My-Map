@@ -155,18 +155,22 @@
         android:layout_marginRight="16dp"
         android:layout_gravity="center"
         >
+
         <RadioButton
             android:id="@+id/status_safe"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/safe"
-            android:textStyle="bold"
             android:layout_marginEnd="32dp"
-            android:textColor="@android:color/holo_green_dark"
-            android:paddingEnd="30dp"
-            android:paddingStart="30dp"
             android:background="@drawable/rounded_border"
-            tools:ignore="RtlSymmetry" />
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp"
+            android:text="@string/safe"
+            android:textColor="@android:color/holo_green_dark"
+            android:textStyle="bold"
+            tools:ignore="RtlSymmetry"
+            android:checked="true"
+            />
+
         <RadioButton
             android:id="@+id/status_danger"
             android:layout_width="wrap_content"

@@ -70,7 +70,14 @@
         android:id="@+id/zoneFragment"
         android:name="com.example.mymap.view.ZoneFragment"
         android:label="fragment_zone"
-        tools:layout="@layout/fragment_zone" />
+        tools:layout="@layout/fragment_zone">
+        <argument
+            android:name="zoneAlert"
+            app:argType="com.example.mymap.model.ZoneAlert"
+            android:defaultValue="@null" />
+    </fragment>
+
+
     <activity
         android:id="@+id/zoneActivity"
         android:name="com.example.mymap.view.ZoneActivity"

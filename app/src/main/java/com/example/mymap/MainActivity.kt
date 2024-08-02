@@ -8,7 +8,10 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
+import androidx.fragment.app.commit
 import com.example.mymap.databinding.ActivityMainBinding
+import com.example.mymap.model.ZoneAlert
+import com.example.mymap.view.ZoneAlertFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,10 +20,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        socketManager = SocketManager()
-//        socketManager.connect()
-
 
          binding = ActivityMainBinding.inflate(layoutInflater)
          setContentView(binding.root)
@@ -31,6 +30,24 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
+        val zoneAlert: ZoneAlert? = intent.getParcelableExtra("zoneAlert")
+
+//        if (zoneAlert != null) {
+//            val fragment = ZoneAlertFragment().apply {
+//                arguments = Bundle().apply {
+//                    putParcelable("zoneAlert", zoneAlert)
+//                }
+//            }
+//            supportFragmentManager.commit {
+//                replace(R.id.nav_host_fragment_content_main, fragment)
+//            }
+//        }
+        if (zoneAlert != null) {
+            val bundle = Bundle().apply {
+                putParcelable("zoneAlert", zoneAlert)
+            }
+            navController.navigate(R.id.zoneAlertFragment, bundle)
+        }
 
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

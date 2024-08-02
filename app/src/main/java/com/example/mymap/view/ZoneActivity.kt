@@ -1,6 +1,7 @@
 package com.example.mymap.view
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Point
 import android.location.Geocoder
@@ -20,8 +21,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.mymap.MainActivity
 import com.example.mymap.R
 import com.example.mymap.databinding.ActivityZoneBinding
+import com.example.mymap.model.ZoneAlert
 import com.example.mymap.socket.SocketManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -88,15 +91,31 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
             val onEnter = binding.alertOnEnter.isChecked
             val onLeave = binding.alertOnLeave.isChecked
 
+
             zoneLocation = googleMap.cameraPosition.target
+            val currentZoneLocation = zoneLocation
 
             val radiusInPixels = binding.zoneView.width / 2
 
             // Chuyển đổi bán kính từ pixel sang mét
             val radiusInMeters = getRadiusInMeters(googleMap, zoneLocation!!, radiusInPixels)
 
+            Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation, radius: $radiusInMeters")
 
-            Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation,googleMap.cameraPosition.zoom: ${googleMap.cameraPosition.zoom}, radius: $radiusInMeters")
+            val zoneAlert = ZoneAlert(
+                zoneName,
+                status,
+                onEnter,
+                onLeave,
+                currentZoneLocation?.latitude ?: 0.0,
+                currentZoneLocation?.longitude ?: 0.0,
+                radiusInMeters
+            )
+            val intent = Intent(this, MainActivity::class.java).apply {
+                putExtra("zoneAlert", zoneAlert)
+            }
+            startActivity(intent)
+
         })
         binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
