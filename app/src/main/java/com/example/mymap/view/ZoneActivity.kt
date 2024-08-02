@@ -23,14 +23,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.mymap.MainActivity
 import com.example.mymap.R
+import com.example.mymap.database.AppDatabase
 import com.example.mymap.databinding.ActivityZoneBinding
 import com.example.mymap.model.ZoneAlert
+import com.example.mymap.model.ZoneAlertEntity
 import com.example.mymap.socket.SocketManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -111,6 +116,23 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
                 currentZoneLocation?.longitude ?: 0.0,
                 radiusInMeters
             )
+
+            val db = AppDatabase.getDatabase(applicationContext)
+            CoroutineScope(Dispatchers.IO).launch {
+                db.zoneAlertDao().insert(
+                    ZoneAlertEntity(
+                        zoneName = zoneAlert.zoneName,
+                        status = zoneAlert.status,
+                        onEnter = zoneAlert.onEnter,
+                        onLeave = zoneAlert.onLeave,
+                        latitude = zoneAlert.latitude,
+                        longitude = zoneAlert.longitude,
+                        radius = zoneAlert.radius
+                    )
+                )
+            }
+
+
             val intent = Intent(this, MainActivity::class.java).apply {
                 putExtra("zoneAlert", zoneAlert)
             }
@@ -200,6 +222,15 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
+        googleMap.uiSettings.isZoomControlsEnabled = true
+        googleMap.uiSettings.isMapToolbarEnabled = true
+        googleMap.uiSettings.isCompassEnabled = true
+        googleMap.uiSettings.isRotateGesturesEnabled = true
+        googleMap.uiSettings.isScrollGesturesEnabled = true
+        googleMap.uiSettings.isTiltGesturesEnabled = true
+        googleMap.uiSettings.isZoomGesturesEnabled = true
+        googleMap.isMyLocationEnabled = true
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 101)

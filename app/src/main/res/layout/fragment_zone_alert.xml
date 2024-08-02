@@ -24,7 +24,6 @@
         android:layout_height="wrap_content"
         android:id="@+id/rv_zone_alert"
         android:layout_margin="16dp"
-
         >
     </androidx.recyclerview.widget.RecyclerView>
 

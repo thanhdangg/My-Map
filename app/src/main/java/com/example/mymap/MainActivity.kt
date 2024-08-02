@@ -32,16 +32,6 @@ class MainActivity : AppCompatActivity() {
 
         val zoneAlert: ZoneAlert? = intent.getParcelableExtra("zoneAlert")
 
-//        if (zoneAlert != null) {
-//            val fragment = ZoneAlertFragment().apply {
-//                arguments = Bundle().apply {
-//                    putParcelable("zoneAlert", zoneAlert)
-//                }
-//            }
-//            supportFragmentManager.commit {
-//                replace(R.id.nav_host_fragment_content_main, fragment)
-//            }
-//        }
         if (zoneAlert != null) {
             val bundle = Bundle().apply {
                 putParcelable("zoneAlert", zoneAlert)

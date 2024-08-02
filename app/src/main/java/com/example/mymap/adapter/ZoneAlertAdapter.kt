@@ -38,6 +38,7 @@ class ZoneAlertAdapter(private val zoneAlerts: List<ZoneAlert>) : RecyclerView.A
                 "\nRadius: ${zoneAlert.radius}m, " +
                 "\nOn Enter: ${zoneAlert.onEnter}, " +
                 "On Leave: ${zoneAlert.onLeave}"
+        
 
     }
 

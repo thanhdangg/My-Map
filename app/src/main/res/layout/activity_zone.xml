@@ -95,15 +95,16 @@
 
         </FrameLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <ImageButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginBottom="@dimen/fab_margin"
-            android:alpha="0.5"
-            app:srcCompat="@drawable/ic_my_location" />
+            android:layout_marginBottom="100dp"
+            app:srcCompat="@drawable/ic_my_location"
+            android:background="@android:color/transparent" />
+            />
 
 
     </FrameLayout>
@@ -169,6 +170,7 @@
             android:textStyle="bold"
             tools:ignore="RtlSymmetry"
             android:checked="true"
+
             />
 
         <RadioButton
