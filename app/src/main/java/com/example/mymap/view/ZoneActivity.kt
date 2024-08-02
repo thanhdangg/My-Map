@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Point
 import android.location.Geocoder
+import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -32,7 +33,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityZoneBinding
-    private var zoneStatus = ""
+    private var zoneStatus = "safe"
     private var onEnter = false
     private var onLeave = false
     private lateinit var googleMap: GoogleMap
@@ -87,14 +88,15 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
             val onEnter = binding.alertOnEnter.isChecked
             val onLeave = binding.alertOnLeave.isChecked
 
-//            val x = binding.zoneLocation.left + binding.zoneLocation.width / 2
-//            val y = binding.zoneLocation.top + binding.zoneLocation.height / 2
-//
-//            val point = Point(x, y)
-//            zoneLocation = googleMap.projection.fromScreenLocation(point)
             zoneLocation = googleMap.cameraPosition.target
 
-            Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation")
+            val radiusInPixels = binding.zoneView.width / 2
+
+            // Chuyển đổi bán kính từ pixel sang mét
+            val radiusInMeters = getRadiusInMeters(googleMap, zoneLocation!!, radiusInPixels)
+
+
+            Log.d("ZoneActivity", "zoneName: $zoneName, status: $status, onEnter: $onEnter, onLeave: $onLeave, zoneLocation: $zoneLocation,googleMap.cameraPosition.zoom: ${googleMap.cameraPosition.zoom}, radius: $radiusInMeters")
         })
         binding.statusGroup.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
@@ -148,6 +150,35 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
         })
 
     }
+
+    private fun getRadiusInMeters(map: GoogleMap, center: LatLng, radiusInPixels: Int): Double {
+        // Lấy độ dài một pixel theo mét tại vị trí cụ thể
+        val metersPerPixel = getMetersPerPixel(map, center)
+
+        // Tính bán kính thực tế
+        return radiusInPixels * metersPerPixel
+    }
+
+    private fun getMetersPerPixel(map: GoogleMap, center: LatLng): Double {
+        val projection = map.projection
+        val zoomLevel = map.cameraPosition.zoom
+        val equatorLength = 40075004.0 // Chu vi Trái Đất theo mét
+
+        val latLng1 = projection.fromScreenLocation(Point(0, 0))
+        val latLng2 = projection.fromScreenLocation(Point(0, 1))
+
+        val distance = FloatArray(1)
+        Location.distanceBetween(
+            latLng1.latitude, latLng1.longitude,
+            latLng2.latitude, latLng2.longitude,
+            distance
+        )
+        return distance[0].toDouble()
+
+//        return distance[0].toDouble() / equatorLength / Math.pow(2.0, zoomLevel.toDouble())
+    }
+
+
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
 
