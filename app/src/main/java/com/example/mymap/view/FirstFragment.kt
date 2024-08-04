@@ -44,7 +44,6 @@ class FirstFragment : Fragment() {
         googleMap.clear()
         val currentLocation = LatLng(location.latitude, location.longitude)
         googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
-//        Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
 
         val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
         val userId = sharedPreferences?.getString("userId", "")
@@ -73,6 +72,25 @@ class FirstFragment : Fragment() {
         socketManager.onLocationUpdateReceived = { data ->
             Log.d("Tracking_FirstFragment", "Received location update: $data")
             handleFriendLocationUpdate(data)
+        }
+        socketManager.onFindFriendResult = { result ->
+            Log.d("Tracking_FirstFragment", "onFindFriendResult: $result")
+            activity?.runOnUiThread {
+                val id = result.getString("id")
+                val phoneNumber = result.getString("phoneNumber")
+                val userName = result.getString("userName")
+                val locationX = result.getString("locationX")
+                val locationY = result.getString("locationY")
+                val friendId = result.getString("friendId")
+                val role = result.getString("role")
+
+                Log.d("Tracking_FirstFragment", "Received data: id=$id, phoneNumber=$phoneNumber, userName=$userName, locationX=$locationX, locationY=$locationY, friendId=$friendId, role=$role")
+
+                val friendLocation = LatLng(locationX.toDouble(), locationY.toDouble())
+                val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                googleMap.addMarker(MarkerOptions().position(friendLocation).title("Friend's Location").icon(markerColor))
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(friendLocation, 15f))
+            }
         }
     }
 
@@ -149,7 +167,7 @@ class FirstFragment : Fragment() {
         val currentLocation = LatLng(location.latitude, location.longitude)
         googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
-        Log.d("Tracking_Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+        Log.d("Tracking_Location", "updateMapLocation Latitude: ${location.latitude}, Longitude: ${location.longitude}")
     }
 
     private fun sendLocationToServer(location: Location) {
@@ -172,11 +190,10 @@ class FirstFragment : Fragment() {
         }
     }
     private fun requestFriendLocation() {
-        // Request friend location from server
-        // This can be implemented based on your server logic
         val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
         val userId = sharedPreferences?.getString("friend_userId", "")
         val phoneNumber = sharedPreferences?.getString("friend_phoneNumber", "")
+        Log.d("Tracking_Location", "Friend info: $userId, $phoneNumber")
 
         if (userId != null) {
             phoneNumber?.let { socketManager.findFriend(it, userId) }
