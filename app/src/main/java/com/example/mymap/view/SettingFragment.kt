@@ -35,11 +35,11 @@ class SettingFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            application.socketManager = SocketManager(requireContext())
+            val socketManager = application.socketManager
             try{
-                application.socketManager.register(userId.toInt())
+                socketManager.register(userId.toInt())
 
-                application.socketManager.onUserInfoReceived = { userInfo ->
+                socketManager.onUserInfoReceived = { userInfo ->
                     val userName = userInfo.getString("userName")
                     val phoneNumber = userInfo.getString("phoneNumber")
                     Log.d("Tracking_SettingFragment", "User info: $userId, $userName, $phoneNumber")
@@ -56,7 +56,7 @@ class SettingFragment : Fragment() {
                         Log.d("Tracking_SettingFragment", "SharedPref saved: $userId, $userName, $phoneNumber")
                     }
                 }
-                application.socketManager.getUserInfo(userId.toInt())
+                socketManager.getUserInfo(userId.toInt())
 
                 binding.btnConnectServer.text = "Connected to server"
                 binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))

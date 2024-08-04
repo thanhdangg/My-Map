@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import com.example.mymap.R
 import com.example.mymap.databinding.FragmentFirstBinding
 import com.example.mymap.model.MyApplication
+import com.example.mymap.notification.NotificationManager
 import com.example.mymap.socket.SocketManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -35,15 +36,17 @@ class FirstFragment : Fragment() {
     private lateinit var locationManager: LocationManager
     private lateinit var socketManager: SocketManager
 
+    private lateinit var notificationManager: NotificationManager
+
     private lateinit var handler: Handler
     private var runnable: Runnable? = null
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 101
 
     private val locationListener: LocationListener = LocationListener { location ->
-        googleMap.clear()
-        val currentLocation = LatLng(location.latitude, location.longitude)
-        googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
+//        googleMap.clear()
+//        val currentLocation = LatLng(location.latitude, location.longitude)
+//        googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
 
         val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
         val userId = sharedPreferences?.getString("userId", "")
@@ -69,10 +72,19 @@ class FirstFragment : Fragment() {
         val application = context.applicationContext as MyApplication
         socketManager = application.socketManager
 
+        // Initialize notificationManager
+        notificationManager = application.notificationManager
+
+        // Initialize locationManager
+        locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+
         socketManager.onLocationUpdateReceived = { data ->
             Log.d("Tracking_FirstFragment", "Received location update: $data")
             handleFriendLocationUpdate(data)
         }
+        Log.d("Tracking_FirstFragment", "onLocationUpdateReceived callback set")
+
         socketManager.onFindFriendResult = { result ->
             Log.d("Tracking_FirstFragment", "onFindFriendResult: $result")
             activity?.runOnUiThread {
@@ -92,6 +104,13 @@ class FirstFragment : Fragment() {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(friendLocation, 15f))
             }
         }
+        socketManager.onTrackingInfoReceived = { data ->
+            Log.d("Tracking_FirstFragment", "Received tracking info: $data")
+            handleFriendLocationUpdate(data)
+
+        }
+//        requestLocationUpdates()
+
     }
 
     override fun onCreateView(
@@ -104,19 +123,33 @@ class FirstFragment : Fragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync { map ->
             googleMap = map
-        }
+            googleMap.uiSettings.isCompassEnabled = true
+            googleMap.uiSettings.isMapToolbarEnabled = true
+            googleMap.uiSettings.isRotateGesturesEnabled = true
+            googleMap.uiSettings.isScrollGesturesEnabled = true
+            googleMap.uiSettings.isTiltGesturesEnabled = true
+            googleMap.uiSettings.isZoomGesturesEnabled = true
 
-        locationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            requestLocationUpdates()
+
+//            socketManager.onLocationUpdateReceived = { data ->
+//                Log.d("Tracking_FirstFragment", "onLocationUpdateReceived Received location update: $data")
+//                handleFriendLocationUpdate(data)
+//            }
+
+        }
 
         handler = Handler(Looper.getMainLooper())
 
-        binding.fab.setOnClickListener {
-            requestLocationUpdates()
-        }
+//        binding.fab.setOnClickListener {
+//            requestLocationUpdates()
+//        }
 
         binding.btnLocationFriend.setOnClickListener {
             requestFriendLocation()
         }
+
+        notificationManager.requestNotificationPermission(requireActivity())
 
         return binding.root
     }
@@ -136,6 +169,10 @@ class FirstFragment : Fragment() {
         }
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, locationListener)
+        googleMap.isMyLocationEnabled = true
+        googleMap.uiSettings.isMyLocationButtonEnabled = true
+//        googleMap.setPadding(0, 300, 10, 30) //set vi tri cho buttonn mylocation
+
         startPeriodicLocationUpdate()
     }
 
@@ -165,8 +202,8 @@ class FirstFragment : Fragment() {
     private fun updateMapLocation(location: Location) {
         googleMap.clear()
         val currentLocation = LatLng(location.latitude, location.longitude)
-        googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+//        googleMap.addMarker(MarkerOptions().position(currentLocation).title("Current Location"))
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
         Log.d("Tracking_Location", "updateMapLocation Latitude: ${location.latitude}, Longitude: ${location.longitude}")
     }
 
@@ -191,7 +228,7 @@ class FirstFragment : Fragment() {
     }
     private fun requestFriendLocation() {
         val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
-        val userId = sharedPreferences?.getString("friend_userId", "")
+        val userId = sharedPreferences?.getString("userId", "")
         val phoneNumber = sharedPreferences?.getString("friend_phoneNumber", "")
         Log.d("Tracking_Location", "Friend info: $userId, $phoneNumber")
 
@@ -247,16 +284,24 @@ class FirstFragment : Fragment() {
     }
 
     private fun handleFriendLocationUpdate(data: JSONArray) {
-        for (i in 0 until data.length()) {
-            val friendLocation = data.getJSONObject(i)
-            val locationX = friendLocation.getDouble("locationX")
-            val locationY = friendLocation.getDouble("locationY")
-            val friendLocationLatLng = LatLng(locationX, locationY)
-            val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-            googleMap.addMarker(MarkerOptions().position(friendLocationLatLng).title("Friend's Location").icon(markerColor))
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(friendLocationLatLng, 15f))
-            Log.d("Tracking_FirstFragment", "Friend's Location: $friendLocation")
+        Log.d("Tracking_FirstFragment", "Handling friend location update from FirstFragment data length: ${data.length()}")
+        activity?.runOnUiThread {
+            for (i in 0 until data.length()) {
+                val locationInfo = data.getJSONObject(i)
+                val userId = locationInfo.getInt("userId")
+                val userName = locationInfo.getString("userName")
+                val phoneNumber = locationInfo.getString("phoneNumber")
+                val locationX = locationInfo.getDouble("locationX")
+                val locationY = locationInfo.getDouble("locationY")
+                val friendLocationLatLng = LatLng(locationX, locationY)
+                Log.d("Tracking_FirstFragment", "Friend's Location: $userId, $userName, $phoneNumber, $locationX, $locationY")
+                val markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                googleMap.addMarker(MarkerOptions().position(friendLocationLatLng).title("Friend's Location").icon(markerColor))
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(friendLocationLatLng, 15f))
+                Log.d("Tracking_FirstFragment", "Friend's Location: $locationInfo")
 
+                notificationManager.handleFriendLocationUpdate(data)
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ class SocketManager(private val context: Context) {
     var onFindFriendResult: ((JSONObject) -> Unit)? = null
     var onLocationUpdateReceived: ((JSONArray) -> Unit)? = null
     var onUserInfoReceived: ((JSONObject) -> Unit)? = null
+    var onTrackingInfoReceived: ((JSONArray) -> Unit)? = null
 
     var onFriendEnterZone: ((String, ZoneAlert) -> Unit)? = null
     var onFriendLeaveZone: ((String, ZoneAlert) -> Unit)? = null
@@ -76,15 +77,34 @@ class SocketManager(private val context: Context) {
                     }
                 }
 
+                // In `SocketManager.kt`
                 socket?.on("location-update") { args ->
                     if (args.isNotEmpty()) {
-                        val data = args[0] as JSONArray
-                        Log.d("Tracking_Socket", "Received location update: $data")
-                        onLocationUpdateReceived?.invoke(data)
+                        val data = args[0] as JSONObject
+                        val friendsLocationUpdates = data.getJSONArray("friendsLocationUpdates")
+                        Log.d("Tracking_Socket", "location-update Friends location updates: $friendsLocationUpdates")
+                        onLocationUpdateReceived?.let {
+                            Log.d("Tracking_Socket", "Invoking onLocationUpdateReceived callback")
+                            it.invoke(friendsLocationUpdates)
+                        } ?: run {
+                            Log.d("Tracking_Socket", "onLocationUpdateReceived callback is null")
+                        }
                     } else {
                         Log.d("Tracking_Socket", "location-update event received with empty args")
                     }
                 }
+
+                socket?.on("tracking") { args ->
+                    if (args.isNotEmpty()) {
+                        Log.d("Tracking_Socket", "tracking Received tracking info: $args")
+                        val data = args[0] as JSONArray
+                        Log.d("Tracking_Socket", "tracking Received tracking info: $data")
+                        onTrackingInfoReceived?.invoke(data)
+                    } else {
+                        Log.d("Tracking_Socket", "tracking event received with empty args")
+                    }
+                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("Tracking_Socket", "Exception: ${e.message}")
@@ -218,9 +238,9 @@ class SocketManager(private val context: Context) {
     fun sendTrackingInfo(userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
         try {
             val data = JSONObject()
-            data.put("userId", userId)
+            data.put("userId", userId.toInt())
             data.put("userName", userName)
-            data.put("phoneNumber", phoneNumber)
+            data.put("phoneNumber", phoneNumber.toInt())
             data.put("locationX", locationX)
             data.put("locationY", locationY)
             socket?.emit("tracking", data)

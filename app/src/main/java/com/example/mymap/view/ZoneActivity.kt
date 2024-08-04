@@ -47,6 +47,7 @@ class ZoneActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var locationManager: LocationManager
     private lateinit var socketManager: SocketManager
 
+
     private var zoneLocation: LatLng? = null
     private val locationListener: LocationListener = LocationListener { location ->
         googleMap.clear()
