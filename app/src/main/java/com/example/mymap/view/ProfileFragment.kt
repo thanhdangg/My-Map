@@ -46,11 +46,6 @@ class ProfileFragment : Fragment() {
     ): View {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
 
-//        val application = context?.applicationContext as? MyApplication
-//        if (application != null) {
-//            socketManager = application.socketManager
-//        }
-
         socketManager.onFriendRequest { userId ->
             Log.d("Tracking_ProfileFragment", "onFriendRequestReceived userId: $userId")
             activity?.runOnUiThread {
@@ -102,7 +97,9 @@ class ProfileFragment : Fragment() {
         binding.btnFindFriend.setOnClickListener {
             val phoneNumber = binding.phoneNumberInput.text.toString()
             val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return@setOnClickListener
+
             val userId = sharedPref.getString("userId", null)
+            Log.d("Tracking_ProfileFragment", "userId from sharedPref: $userId")
             if (userId == null) {
                 Log.d("Tracking_ProfileFragment", "UserId is null")
                 return@setOnClickListener

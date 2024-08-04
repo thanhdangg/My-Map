@@ -57,6 +57,24 @@ class SocketManager(private val context: Context) {
                         onFriendAccepted?.invoke(data)
                     }
                 }
+                socket?.on("user-info") { args ->
+                    if (args.isNotEmpty()) {
+                        val userInfo = args[0] as JSONObject
+                        Log.d("Tracking_Socket", "Received user info: $userInfo")
+                        onUserInfoReceived?.invoke(userInfo)
+                    } else {
+                        Log.d("Tracking_Socket", "user-info event received with empty args")
+                    }
+                }
+                socket?.on("check-friend") { args ->
+                    if (args.isNotEmpty()) {
+                        val result = args[0] as JSONObject
+                        Log.d("Tracking_Socket", "Received friend info: $result")
+                        onFindFriendResult?.invoke(result)
+                    } else {
+                        Log.d("Tracking_Socket", "check-friend event received with empty args")
+                    }
+                }
 
                 socket?.on("location-update") { args ->
                     if (args.isNotEmpty()) {
@@ -131,7 +149,7 @@ class SocketManager(private val context: Context) {
         val data = JSONObject()
         data.put("userId", userId)
         socket?.emit("get-user-info", userId)
-        Log.d("Tracking_Socket", "getUserInfo: userId=$userId")
+        Log.d("Tracking_Socket", "getUserInfo: userId=$userId, data=$data")
         onUserInfoReceived?.invoke(data)
     }
 
@@ -193,7 +211,7 @@ class SocketManager(private val context: Context) {
         val data = JSONObject()
         data.put("phoneNumber", phoneNumber)
         data.put("userId", userId)
-        Log.d("Tracking_Socket", "findFriend data: $data")
+        Log.d("Tracking_Socket", "findFriend: phoneNumber=$phoneNumber, userId=$userId")
         socket?.emit("find-friend", data)
     }
 
