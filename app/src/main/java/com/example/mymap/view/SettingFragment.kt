@@ -14,11 +14,9 @@ import com.example.mymap.databinding.FragmentSettingBinding
 import com.example.mymap.model.MyApplication
 import com.example.mymap.socket.SocketManager
 
-
 class SettingFragment : Fragment() {
 
     private lateinit var binding: FragmentSettingBinding
-
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
@@ -35,47 +33,48 @@ class SettingFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            application.socketManager = SocketManager(requireContext())
-            try{
-                application.socketManager.connect()
+            if (application.socketManager == null) {
+                application.socketManager = SocketManager(requireContext())
+                Log.d("Tracking_SettingFragment", "Socket null")
+
+            } else {
+                application.socketManager.connectToServer()
+                Log.d("Tracking_SettingFragment", "Socket connected")
+            }
+
+            try {
                 application.socketManager.register(userId.toInt())
+                val sharedPref = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
+                sharedPref?.edit()?.apply {
+                    putString("userId", userId)
+                    apply()
+                }
+                Log.d("Tracking_SettingFragment", "User info saved: $userId")
 
                 application.socketManager.onUserInfoReceived = { userInfo ->
+                    Log.d("Tracking_SettingFragment", "Received user info: $userInfo")
+
                     val userName = userInfo.getString("userName")
                     val phoneNumber = userInfo.getString("phoneNumber")
                     Log.d("Tracking_SettingFragment", "User info: $userId, $userName, $phoneNumber")
 
-//                    val sharedPreferences = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
                     val sharedPref = activity?.getSharedPreferences("MyApp", Context.MODE_PRIVATE)
-                    if (sharedPref != null) {
-                        with (sharedPref.edit()) {
-                            putString("userId", userId)
-                            putString("userName", userName)
-                            putString("phoneNumber", phoneNumber)
-                            apply()
-                        }
-                        Log.d("Tracking_SettingFragment", "SharedPref saved: $userId, $userName, $phoneNumber")
+                    sharedPref?.edit()?.apply {
+                        putString("userName", userName)
+                        putString("phoneNumber", phoneNumber)
+                        Log.d("Tracking_SettingFragment", "User info saved: $userId, $userName, $phoneNumber")
+                        apply()
                     }
                 }
                 application.socketManager.getUserInfo(userId.toInt())
-
-
-                Log.d("Tracking_SettingFragment", "Connect success")
                 binding.btnConnectServer.text = "Connected to server"
                 binding.btnConnectServer.background = ColorDrawable(Color.parseColor("#00BFFF"))
                 binding.btnConnectServer.isEnabled = false
-
-
             } catch (e: Exception) {
-                e.printStackTrace()
-                Log.d("Tracking_SettingFragment", "Error: ${e.message}")
+                Log.d("Tracking_SettingFragment", "Exception Error: ${e.message}")
             }
-
         }
 
         return binding.root
     }
-
-
-
 }

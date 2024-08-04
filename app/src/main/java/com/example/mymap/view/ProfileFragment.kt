@@ -68,6 +68,8 @@ class ProfileFragment : Fragment() {
                 val friendId = result.getString("friendId")
                 val role = result.getString("role")
 
+                Log.d("Tracking_ProfileFragment", "Received data: id=$id, phoneNumber=$phoneNumber, userName=$userName, locationX=$locationX, locationY=$locationY, friendId=$friendId, role=$role")
+
                 saveUserInfo(requireContext(), id, userName, phoneNumber, locationX.toDouble(), locationY.toDouble())
 
                 val friendInfo = "ID: $id\nPhone Number: $phoneNumber\nUser Name: $userName\nLocation: ($locationX, $locationY)\nFriend ID: $friendId\nRole: $role"

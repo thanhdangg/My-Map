@@ -12,7 +12,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.*
 
-
 class SocketManager(private val context: Context) {
     private var socket: Socket? = null
     var onFriendRequestReceived: ((String) -> Unit)? = null
@@ -24,89 +23,59 @@ class SocketManager(private val context: Context) {
     var onFriendEnterZone: ((String, ZoneAlert) -> Unit)? = null
     var onFriendLeaveZone: ((String, ZoneAlert) -> Unit)? = null
 
-
-    fun connect() {
-        try {
-//            socket = IO.socket("http://192.168.1.216:5000")
-            socket = IO.socket("http://192.168.2.131:5000")
-            socket?.connect()
-        }
-        catch (e: Exception) {
-            Log.d("Tracking_Exception Socket", "Connection error: ${e.message}")
-        }
-
-        socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            Log.d("Tracking_Socket", "Connected")
-        })
-        socket?.on(Socket.EVENT_DISCONNECT, Emitter.Listener {
-            Log.d("Tracking_Socket", "Disconnected")
-        })
-        socket?.on(Socket.EVENT_CONNECT_ERROR, Emitter.Listener { args ->
-            val error = args[0] as Exception
-            Log.d("Tracking_Socket", "Connection error: ${error.message}")
-        })
-        socket?.on("check-friend", Emitter.Listener { args ->
-            try {
-                val data = args[0] as JSONObject
-                Log.d("Tracking_Socket", "Check friend result: $data")
-                onFindFriendResult?.invoke(data)
-            } catch (e: Exception) {
-                Log.e("Tracking_Socket", "Error processing 'check-friend' event: ${e.message}")
-            }
-        })
-
-        socket?.on("friend-request", Emitter.Listener { args ->
-            val data = args[0] as JSONObject
-            Log.d("Tracking_Socket", "Friend request received: $data")
-            val final = data.getJSONObject("final")
-            val userId = final.getString("id")
-//            val userName = final.getString("userName")
-//            val phoneNumber = final.getString("phoneNumber")
-//            val locationX = final.getDouble("locationX")
-//            val locationY = final.getDouble("locationY")
-            Log.d("Tracking_Socket", "Friend request received with userId: $userId")
-            onFriendRequestReceived?.invoke(userId)
-            // Handle friend request
-        })
-        socket?.on("friend-request") { args ->
-            val data = args[0] as JSONObject
-            Log.d("Tracking_Socket", "Friend request received: $data")
-            val final = data.getJSONObject("final")
-            val userId = final.getString("id") // Change this line
-//            val userName = final.getString("userName")
-//            val phoneNumber = final.getString("phoneNumber")
-//            val locationX = final.getDouble("locationX")
-//            val locationY = final.getDouble("locationY")
-            Log.d("Tracking_Socket", "Friend request received with userId: $userId")
-            onFriendRequestReceived?.invoke(userId)
-        }
-
-        socket?.on("friend-accepted", Emitter.Listener { args ->
-            val data = args[0] as JSONObject
-            val receiverInfo = data.getJSONObject("receiverInfo")
-            val userId = receiverInfo.getString("id")
-//            val userName = receiverInfo.getString("userName")
-//            val phoneNumber = receiverInfo.getString("phoneNumber")
-//            val locationX = receiverInfo.getDouble("locationX")
-//            val locationY = receiverInfo.getDouble("locationY")
-            onFriendAccepted?.invoke(userId)
-
-        })
-
-        socket?.on("location-update", Emitter.Listener { args ->
-            val data = args[0] as JSONArray
-            Log.d("Tracking_Socket", "Location update received: $data")
-            onLocationUpdateReceived?.invoke(data)
-        })
-
-        socket?.on("user-info", Emitter.Listener { args ->
-            val data = args[0] as JSONObject
-            Log.d("Tracking_Socket", "User info received: $data")
-            onUserInfoReceived?.invoke(data)
-            handleLocationUpdate(data)
-
-        })
+    init {
+        connectToServer()
     }
+
+    fun connectToServer() {
+        if (socket == null || !socket!!.connected()) {
+            try {
+//                socket = IO.socket("http://192.168.100.252:5000")
+                socket = IO.socket("http://192.168.2.131:5000")
+
+                socket?.connect()
+                Log.d("Tracking_Socket", "Socket connected")
+
+                socket?.on(Socket.EVENT_CONNECT_ERROR) { args ->
+                    Log.e("Tracking_Socket", "Connection error: ${args[0]}")
+                }
+
+                socket?.on(Socket.EVENT_DISCONNECT) {
+                    Log.d("Tracking_Socket", "Disconnected from server")
+                }
+
+                socket?.on("request-friend") { args ->
+                    if (args.isNotEmpty()) {
+                        val data = args[0] as String
+                        onFriendRequestReceived?.invoke(data)
+                    }
+                }
+
+                socket?.on("friend-accepted") { args ->
+                    if (args.isNotEmpty()) {
+                        val data = args[0] as String
+                        onFriendAccepted?.invoke(data)
+                    }
+                }
+
+                socket?.on("location-update") { args ->
+                    if (args.isNotEmpty()) {
+                        val data = args[0] as JSONArray
+                        Log.d("Tracking_Socket", "Received location update: $data")
+                        onLocationUpdateReceived?.invoke(data)
+                    } else {
+                        Log.d("Tracking_Socket", "location-update event received with empty args")
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("Tracking_Socket", "Exception: ${e.message}")
+            }
+        } else {
+            Log.d("Tracking_Socket", "Socket already connected")
+        }
+    }
+
     private fun handleLocationUpdate(data: JSONObject) {
         if (data.has("locations")) {
             val locationArray = data.getJSONArray("locations")
@@ -128,7 +97,7 @@ class SocketManager(private val context: Context) {
                 }
             }
         } else {
-            Log.e("SocketManager", "No value for locations")
+            Log.e("Tracking_Socket", "No value for locations")
         }
     }
 
@@ -158,13 +127,14 @@ class SocketManager(private val context: Context) {
         return distance <= zone.radius
     }
 
-
     fun getUserInfo(userId: Int) {
         val data = JSONObject()
         data.put("userId", userId)
         socket?.emit("get-user-info", userId)
+        Log.d("Tracking_Socket", "getUserInfo: userId=$userId")
         onUserInfoReceived?.invoke(data)
     }
+
     fun on(eventName: String, listener: Emitter.Listener) {
         socket?.on(eventName, listener)
     }
@@ -177,6 +147,7 @@ class SocketManager(private val context: Context) {
             listener.invoke(userId)
         }
     }
+
     fun onFindFriendResult(listener: (JSONObject) -> Unit) {
         socket?.on("check-friend") { args ->
             val data = args[0] as JSONObject
@@ -184,7 +155,6 @@ class SocketManager(private val context: Context) {
             Log.d("Tracking_Socket", "onFindFriendResult: $data")
         }
     }
-
 
     fun isConnected(): Boolean {
         return socket?.connected() ?: false
@@ -196,6 +166,8 @@ class SocketManager(private val context: Context) {
 
     fun register(userId: Int) {
         socket?.emit("register", userId)
+        Log.d("Tracking_Socket", "Register success")
+        onUserInfoReceived?.invoke(JSONObject())
     }
 
     fun sendFriendRequest(senderId: String, receiverId: String) {
@@ -221,17 +193,21 @@ class SocketManager(private val context: Context) {
         val data = JSONObject()
         data.put("phoneNumber", phoneNumber)
         data.put("userId", userId)
+        Log.d("Tracking_Socket", "findFriend data: $data")
         socket?.emit("find-friend", data)
     }
 
     fun sendTrackingInfo(userId: String, userName: String, phoneNumber: String, locationX: Double, locationY: Double) {
-        val data = JSONObject()
-        data.put("userId", userId)
-        data.put("userName", userName)
-        data.put("phoneNumber", phoneNumber)
-        data.put("locationX", locationX)
-        data.put("locationY", locationY)
-        socket?.emit("tracking", data)
+        try {
+            val data = JSONObject()
+            data.put("userId", userId)
+            data.put("userName", userName)
+            data.put("phoneNumber", phoneNumber)
+            data.put("locationX", locationX)
+            data.put("locationY", locationY)
+            socket?.emit("tracking", data)
+        } catch (e: Exception) {
+            Log.d("Tracking_Exception Socket", "Error: ${e.message}")
+        }
     }
-
 }
